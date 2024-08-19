@@ -88,9 +88,9 @@ const textMaterial = new THREE.ShaderMaterial({
     float scale = r / 15.0; // Heartbeat effect
     pos *= scale;
     
-    pos += vec3(-15, 0.0, 0.0); // Center text
+    pos += vec3(-12, 0.0, 0.0); // Center text
     // Adjust position to keep text centered
-    vec3 offset = vec3(12.0, 0.0, 0.0) * (1.0 - scale);
+    vec3 offset = vec3(10.0, 0.0, 0.0) * (1.0 - scale);
     pos += offset;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
@@ -107,7 +107,7 @@ const textMaterial = new THREE.ShaderMaterial({
 fontLoader.load(
   "droid_serif_regular.typeface.json",
   (font) => {
-    const textGeometry = new TextGeometry("I Love Kim Chi", {
+    const textGeometry = new TextGeometry("I Love You", {
       font: font,
       size: 3,
       height: 1,
