@@ -7,6 +7,9 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 
+
+ 
+
 const renderer = new THREE.WebGLRenderer();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -105,7 +108,7 @@ const textMaterial = new THREE.ShaderMaterial({
 });
 
 fontLoader.load(
-  "public/droid_serif_regular.typeface.json",
+  "droid_serif_regular.typeface.json",
   (font) => {
     const textGeometry = new TextGeometry("Kim Chi", {
       font: font,
