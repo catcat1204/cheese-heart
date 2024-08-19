@@ -1,7 +1,5 @@
-module.exports = {
-    root: './',
-    build: {
-        outDir: 'dist',
-    },
-    publicDir: 'public'
- } 
+export default {
+  root: "./",
+  base: "./",
+  publicDir: "public",
+};
