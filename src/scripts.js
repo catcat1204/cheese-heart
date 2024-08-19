@@ -105,7 +105,7 @@ const textMaterial = new THREE.ShaderMaterial({
 });
 
 fontLoader.load(
-  "node_modules/three/examples/fonts/droid/droid_serif_regular.typeface.json",
+  "src/fonts/droid_serif_regular.typeface.json",
   (font) => {
     const textGeometry = new TextGeometry("Kim Chi", {
       font: font,
