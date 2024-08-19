@@ -6,10 +6,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
-
-
  
-
 const renderer = new THREE.WebGLRenderer();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -91,9 +88,9 @@ const textMaterial = new THREE.ShaderMaterial({
     float scale = r / 15.0; // Heartbeat effect
     pos *= scale;
     
-    pos += vec3(-12, 0.0, 0.0); // Center text
+    pos += vec3(-15, 0.0, 0.0); // Center text
     // Adjust position to keep text centered
-    vec3 offset = vec3(10.0, 0.0, 0.0) * (1.0 - scale);
+    vec3 offset = vec3(12.0, 0.0, 0.0) * (1.0 - scale);
     pos += offset;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
@@ -110,9 +107,9 @@ const textMaterial = new THREE.ShaderMaterial({
 fontLoader.load(
   "droid_serif_regular.typeface.json",
   (font) => {
-    const textGeometry = new TextGeometry("Kim Chi", {
+    const textGeometry = new TextGeometry("I Love Kim Chi", {
       font: font,
-      size: 5,
+      size: 3,
       height: 1,
       curveSegments: 12,
     });
