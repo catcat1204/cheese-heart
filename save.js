@@ -43,8 +43,13 @@ renderer.toneMapping = THREE.LinearToneMapping;
 renderer.toneMappingExposure = 1.5;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
+// Group Text
+const group = new THREE.Group();
+scene.add(group);
+
 // Create Text
 const fontLoader = new FontLoader();
+
 const textMaterial = new THREE.ShaderMaterial({
   uniforms: {
     time: {
@@ -120,7 +125,7 @@ fontLoader.load("droid_serif_regular.typeface.json", (font) => {
   textGeometry.translate(-centerOffsetX, -centerOffsetY, -centerOffsetZ);
   const text = new THREE.Mesh(textGeometry, textMaterial);
 
-  scene.add(text);
+  group.add(text);
 });
 
 // Orbit Controls
@@ -214,11 +219,16 @@ const points = new THREE.Points(
         }
         float dDyn = length(h) - r;  
         float dConst = length(h) - 15.;      
+        
+        // vec3 c = vec3(247. / 255., 89. / 255., 183. / 255.);        
+        // if (dDyn > -1.) c = vec3(245. / 255., 100. / 255., 186. / 255.);
+        // vC = c;
 
         float gradientFactor = sin( pos.x * 0.01 + pos.y * 0.01); 
         gradientFactor = smoothstep(0.0, 1.2, (gradientFactor + 1.0) / 2.0);
 
         vC = mix(color1, color2, gradientFactor);
+      
 
         pos = pos - pos / length(pos) * (dDyn) * 2.5;
 
@@ -244,12 +254,87 @@ const points = new THREE.Points(
   `,
   })
 );
-;
+
+const gui = new dat.GUI();
+gui.close();
+const colorFolder = gui.addFolder("Gradient Colors");
+colorFolder.addColor({ color1: "#FC466B" }, "color1").onChange((value) => {
+  points.material.uniforms.color1.value.set(value);
+});
+colorFolder.addColor({ color2: "#3F5EFB" }, "color2").onChange((value) => {
+  points.material.uniforms.color2.value.set(value);
+});
+colorFolder.open();
+
+const textFolder = gui.addFolder("Text");
+textFolder.addColor({ color1: "#ff5e7f" }, "color1").onChange((value) => {
+  textMaterial.uniforms.color1.value.set(value);
+});
+textFolder.addColor({ color2: "#5975ff" }, "color2").onChange((value) => {
+  textMaterial.uniforms.color2.value.set(value);
+});
+
+const params = {
+  text: "I Love You",
+  size: 3,
+};
+
+textFolder
+  .add(params, "size", 1, 10)
+  .name("Size")
+  .onChange((value) => {
+    group.clear();
+    fontLoader.load("droid_serif_regular.typeface.json", (font) => {
+      const textGeometry = new TextGeometry(params.text, {
+        font: font,
+        size: value,
+        height: 1,
+        curveSegments: 12,
+      });
+      textGeometry.center();
+      const text = new THREE.Mesh(textGeometry, textMaterial);
+      text.position.set(0, 0, 0);
+      group.add(text);
+    });
+  });
+
+textFolder
+  .add(params, "text")
+  .name("Text")
+  .onChange(function () {
+    group.clear();
+    //textMaterial.uniforms.textPos.value = -( (params.text.length > 10 ? params.text.length / 2  : params.text.length )+ 5);
+    fontLoader.load("droid_serif_regular.typeface.json", (font) => {
+      const textGeometry = new TextGeometry(params.text, {
+        font: font,
+        size: params.size,
+        height: 1,
+        curveSegments: 12,
+      });
+      textGeometry.center();
+      const text = new THREE.Mesh(textGeometry, textMaterial);
+      text.position.set(0, 0, 0);
+      group.add(text);
+    });
+  });
+
+textFolder.open();
 
 scene.add(points);
 
 const clock = new THREE.Clock();
 let time = 0;
+
+/*renderer.setAnimationLoop(() => {
+  if (resize(renderer)) {
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+  }
+  time += clock.getDelta();
+  //scene.rotation.y = time * 0.25;
+  points.material.uniforms.time.value = time;
+  renderer.render(scene, camera);
+});*/
 
 function animate() {
   if (resize(renderer, composer)) {
