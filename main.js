@@ -44,8 +44,8 @@ renderer.toneMappingExposure = 1.5;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
 // Group Text
-const group = new THREE.Group();
-scene.add(group);
+/* const group = new THREE.Group();
+scene.add(group); */
 
 // Create Text
 const fontLoader = new FontLoader();
@@ -125,7 +125,8 @@ fontLoader.load("droid_serif_regular.typeface.json", (font) => {
   textGeometry.translate(-centerOffsetX, -centerOffsetY, -centerOffsetZ);
   const text = new THREE.Mesh(textGeometry, textMaterial);
 
-  group.add(text);
+  //group.add(text);
+  scene.add(text);
 });
 
 // Orbit Controls
@@ -274,6 +275,7 @@ textFolder.addColor({ color2: "#5975ff" }, "color2").onChange((value) => {
   textMaterial.uniforms.color2.value.set(value);
 });
 
+/* 
 const params = {
   text: "I Love You",
   size: 3,
@@ -316,7 +318,7 @@ textFolder
       text.position.set(0, 0, 0);
       group.add(text);
     });
-  });
+  }); */
 
 textFolder.open();
 
