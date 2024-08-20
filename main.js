@@ -6,7 +6,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
- 
+
 const renderer = new THREE.WebGLRenderer();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -24,10 +24,12 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(0, 0, 1000).setLength(150);
 renderer.setPixelRatio(window.devicePixelRatio);
 
+// Post Processing
 const renderScene = new RenderPass(scene, camera);
 const composer = new EffectComposer(renderer);
 composer.addPass(renderScene);
 
+// Bloom Pass
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
   1.6,
@@ -41,7 +43,11 @@ renderer.toneMapping = THREE.LinearToneMapping;
 renderer.toneMappingExposure = 1.5;
 renderer.outputEncoding = THREE.sRGBEncoding;
 
-// Font Loader
+// Group Text
+const group = new THREE.Group();
+scene.add(group);
+
+// Create Text
 const fontLoader = new FontLoader();
 
 const textMaterial = new THREE.ShaderMaterial({
@@ -55,6 +61,9 @@ const textMaterial = new THREE.ShaderMaterial({
     color2: {
       value: new THREE.Color(0x5975ff),
     },
+    textPos: {
+      value: -10,
+    },
   },
   vertexShader: `
   #define PI 3.1415926535897932384626433832795
@@ -62,6 +71,7 @@ const textMaterial = new THREE.ShaderMaterial({
   varying vec3 vC;
   uniform vec3 color1;
   uniform vec3 color2;
+  uniform float textPos;
 
   void main() {
     vec3 pos = position;
@@ -83,15 +93,9 @@ const textMaterial = new THREE.ShaderMaterial({
 
     vC = mix(color1, color2, gradientFactor);
 
-    // scale
-
-    float scale = r / 15.0; // Heartbeat effect
+    // Heartbeat
+    float scale = r / 15.0;
     pos *= scale;
-    
-    pos += vec3(-12, 0.0, 0.0); // Center text
-    // Adjust position to keep text centered
-    vec3 offset = vec3(10.0, 0.0, 0.0) * (1.0 - scale);
-    pos += offset;
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
   }
@@ -104,20 +108,25 @@ const textMaterial = new THREE.ShaderMaterial({
 `,
 });
 
-fontLoader.load(
-  "droid_serif_regular.typeface.json",
-  (font) => {
-    const textGeometry = new TextGeometry("I Love You", {
-      font: font,
-      size: 3,
-      height: 1,
-      curveSegments: 12,
-    });
-    const text = new THREE.Mesh(textGeometry, textMaterial);
-    text.position.set(0, 0, 0);
-    scene.add(text);
-  }
-);
+fontLoader.load("droid_serif_regular.typeface.json", (font) => {
+  const textGeometry = new TextGeometry("I Love You", {
+    font: font,
+    size: 3,
+    height: 1,
+    curveSegments: 12,
+  });
+  textGeometry.computeBoundingBox();
+  const boundingBox = textGeometry.boundingBox;
+
+  const centerOffsetX = (boundingBox.max.x - boundingBox.min.x) / 2;
+  const centerOffsetY = (boundingBox.max.y - boundingBox.min.y) / 2;
+  const centerOffsetZ = (boundingBox.max.z - boundingBox.min.z) / 2;
+
+  textGeometry.translate(-centerOffsetX, -centerOffsetY, -centerOffsetZ);
+  const text = new THREE.Mesh(textGeometry, textMaterial);
+
+  group.add(text);
+});
 
 // Orbit Controls
 const orbit = new OrbitControls(camera, renderer.domElement);
@@ -126,7 +135,8 @@ orbit.enablePan = false;
 
 // Axes
 /* const axesHelper = new THREE.AxesHelper(5);
-scene.add(axesHelper); */
+scene.add(axesHelper);
+ */
 
 orbit.update();
 
@@ -245,7 +255,8 @@ const points = new THREE.Points(
   })
 );
 
-/* const gui = new dat.GUI();
+const gui = new dat.GUI();
+gui.close();
 const colorFolder = gui.addFolder("Gradient Colors");
 colorFolder.addColor({ color1: "#FC466B" }, "color1").onChange((value) => {
   points.material.uniforms.color1.value.set(value);
@@ -254,7 +265,60 @@ colorFolder.addColor({ color2: "#3F5EFB" }, "color2").onChange((value) => {
   points.material.uniforms.color2.value.set(value);
 });
 colorFolder.open();
- */
+
+const textFolder = gui.addFolder("Text");
+textFolder.addColor({ color1: "#ff5e7f" }, "color1").onChange((value) => {
+  textMaterial.uniforms.color1.value.set(value);
+});
+textFolder.addColor({ color2: "#5975ff" }, "color2").onChange((value) => {
+  textMaterial.uniforms.color2.value.set(value);
+});
+
+const params = {
+  text: "I Love You",
+  size: 3,
+};
+
+textFolder
+  .add(params, "size", 1, 10)
+  .name("Size")
+  .onChange((value) => {
+    group.clear();
+    fontLoader.load("droid_serif_regular.typeface.json", (font) => {
+      const textGeometry = new TextGeometry(params.text, {
+        font: font,
+        size: value,
+        height: 1,
+        curveSegments: 12,
+      });
+      textGeometry.center();
+      const text = new THREE.Mesh(textGeometry, textMaterial);
+      text.position.set(0, 0, 0);
+      group.add(text);
+    });
+  });
+
+textFolder
+  .add(params, "text")
+  .name("Text")
+  .onChange(function () {
+    group.clear();
+    //textMaterial.uniforms.textPos.value = -( (params.text.length > 10 ? params.text.length / 2  : params.text.length )+ 5);
+    fontLoader.load("droid_serif_regular.typeface.json", (font) => {
+      const textGeometry = new TextGeometry(params.text, {
+        font: font,
+        size: params.size,
+        height: 1,
+        curveSegments: 12,
+      });
+      textGeometry.center();
+      const text = new THREE.Mesh(textGeometry, textMaterial);
+      text.position.set(0, 0, 0);
+      group.add(text);
+    });
+  });
+
+textFolder.open();
 
 scene.add(points);
 
@@ -303,7 +367,7 @@ function resize(renderer, composer) {
 }
 
 // Handle window resize
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   const width = window.innerWidth;
   const height = window.innerHeight;
   renderer.setSize(width, height);
