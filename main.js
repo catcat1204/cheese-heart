@@ -104,7 +104,7 @@ const textMaterial = new THREE.ShaderMaterial({
 });
 
 fontLoader.load("droid_serif_regular.typeface.json", (font) => {
-  const textGeometry = new TextGeometry("I Love You", {
+  const textGeometry = new TextGeometry("I Love Kim Chi", {
     font: font,
     size: 3,
     height: 1,
